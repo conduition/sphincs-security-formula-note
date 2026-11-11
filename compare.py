@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from decimal import Decimal, getcontext
-from math import log2, log10, ceil, comb, e, factorial, log
+from math import log2, log10, comb, e, factorial
 from collections.abc import Hashable
 
 #### Generic caching layer to save time
@@ -40,10 +40,9 @@ def sigmalimit(tsec):
 def donelimit(tsec):
   return 1 - sigmalimit(tsec) / Decimal(2**20)
 
-e = Decimal(e)
 @memoized
 def poisson_pmf(rate, n_events):
-  return rate**n_events * e**(-rate) / factorial(n_events)
+  return rate**n_events * Decimal(e)**(-rate) / factorial(n_events)
 
 getcontext().prec = int(log10(2**768)) + 1  # ~232 digits: headroom for catastrophic cancellation
 

@@ -4,9 +4,8 @@
 \usepackage{booktabs}
 \usepackage{xcolor}
 \usepackage[margin=1.5in]{geometry}
-\usepackage[hidelinks,
-            colorlinks=true,
-            linkcolor=black,
+\usepackage[colorlinks=true,
+            linkcolor=blue,
             urlcolor=blue]{hyperref}
 
 \newcommand{\spx}{SPHINCS$^+$}
@@ -52,11 +51,15 @@ The overall \spx generic ITSR forgery probability $\sigma$ is then defined as a 
 
 $\lambda = -\log_2 \sigma$ is precisely the ``bit security" level of \spx against generic FORS forgery attacks.
 
-Computing $\sigma$ precisely requires evaluating this sum over $q_s$ terms, which for many parameter sets is exceedingly large, e.g. $q_s = 2^{64}$ for NIST's SLH-DSA parameter sets \cite{fips205}.
+\section{Motivation}
+
+Computing $\sigma$ precisely requires evaluating the sum in (\ref{eq:sigma-naive}) over $q_s$ terms, which for many parameter sets is exceedingly large, e.g. $q_s = 2^{64}$ for NIST's SLH-DSA parameter sets \cite{fips205}.
 
 Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the leading terms until the contributions of additional terms fall below some threshold. This is imprecise, and does not scale when $q_s \gg 2^h$.
 
-In the following section, we derive an exact closed-form formula for $\sigma$, requiring only $O(k)$ computations.
+\cite{smaller_sphincs} gives an approximation of (\ref{eq:sigma-naive}) in terms of a Poisson distribution which can be more efficiently computed, but this is still only an approximation with $q_s$ terms.
+
+In the following section, we derive an \emph{exact} closed-form formula for $\sigma$, requiring only $O(k)$ computations.
 
 \section{Derivation}
 

@@ -96,6 +96,12 @@ PARAMETER_SETS = {
   'fd_diverge_4': [10,  6, 33, 8, 256],
   'fd_diverge_5': [14,  6, 33, 4, 256],
   'fd_diverge_6': [10, 15, 20, 4, 256],
+
+  # Performance comparison. BHK+19 and SD25 approximations converge very slowly on
+  # these parameter sets, requiring thousands of terms summed.
+  'perf_stress_1': [52, 20, 16, 2**64, 128],
+  'perf_stress_2': [52, 18, 24, 2**64, 128],
+  'perf_stress_3': [48, 20, 32, 2**64, 128],
 }
 
 if __name__ == "__main__":

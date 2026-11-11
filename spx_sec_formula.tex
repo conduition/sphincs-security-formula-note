@@ -80,7 +80,7 @@ Substitute into (\ref{eq:sigma-naive}).
          &= \sum_{\gamma=1}^{q_s} \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma} P_\text{select}(\gamma)
 \end{align}
 
-Since $\mathrm{DarkSide}_0 = 0$, we may extend the sum to include a $\gamma = 0$ term which contributes nothing. Then swap the sums and factor out.\footnote{Intuitively: with zero preimages exposed, the attacker cannot hit any of them.}
+Since $\mathrm{DarkSide}_0 = 0$, we may extend the sum to include a $\gamma = 0$ term which contributes nothing\footnote{Intuitively: With zero preimages exposed, an attacker cannot hit any of them.}. Then swap the sums and factor out.
 
 \begin{align}
   \sigma &= \sum_{\gamma=0}^{q_s} \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma} P_\text{select}(\gamma)\\

@@ -57,7 +57,7 @@ Computing $\sigma$ precisely requires evaluating the sum in (\ref{eq:sigma-naive
 
 Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the leading terms until the contributions of additional terms fall below some threshold. This is imprecise, and does not scale when $q_s \gg 2^h$.
 
-\cite{smaller_sphincs} gives an approximation of (\ref{eq:sigma-naive}) in terms of a Poisson distribution which can be more efficiently computed, but this is still only an approximation with $q_s$ terms.
+\cite{smaller_sphincs} (Section 5) gives an approximation of (\ref{eq:sigma-naive}) in terms of a Poisson distribution which can be more efficiently computed, but this is still only an approximation with $q_s$ terms.
 
 In the following section, we derive an \emph{exact} closed-form formula for $\sigma$, requiring only $O(k)$ computations.
 
@@ -73,7 +73,7 @@ Expand $\mathrm{DarkSide}^k_\gamma$ with the binomial theorem identity $(x + y)^
 
 Let $P_\text{select}(\gamma) := \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^h} \right)^\gamma$ be the binomial probability of exactly $\gamma$ successes after $q_s$ trials, with a per-trial success rate of $\frac{1}{2^h}$.
 
-Substitute into the formula for $\sigma$ (\ref{eq:sigma-naive}).
+Substitute into (\ref{eq:sigma-naive}).
 
 \begin{align}
   \sigma &= \sum_{\gamma=1}^{q_s} \mathrm{DarkSide}^k_\gamma \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^{h}} \right)^\gamma \\

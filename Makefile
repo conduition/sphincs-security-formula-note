@@ -14,11 +14,11 @@ BUILDTX  = $(MAIN).tex $(BIB).bib
 all: $(MAIN).pdf
 
 $(MAIN).pdf: $(BUILDTX)
-	$(TEX) $(MAIN).tex
+	$(TEX) -halt-on-error $(MAIN).tex
 	-$(BIBC) $(MAIN)
-	$(TEX) $(MAIN).tex
-	$(TEX) $(MAIN).tex
-	$(TEX) $(MAIN).tex
+	$(TEX) -halt-on-error $(MAIN).tex
+	$(TEX) -halt-on-error $(MAIN).tex
+	$(TEX) -halt-on-error $(MAIN).tex
 
 clean:
 	rm -f $(MAIN).aux $(MAIN).log $(MAIN).out $(MAIN).toc $(MAIN).pdf \

@@ -58,7 +58,7 @@ Computing $\sigma$ precisely requires evaluating the sum in (\ref{eq:sigma-naive
 
 Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the leading terms until the contributions of additional terms fall below some threshold. This is imprecise, and does not scale when $q_s \gg 2^h$.
 
-\cite{smaller_sphincs} (Section 5) gives an approximation of (\ref{eq:sigma-naive}) in terms of a Poisson distribution which can be more efficiently computed, but this is still only an approximation with $q_s$ terms.
+\cite{smaller_sphincs} (Section 5) gives an approximation of (\ref{eq:sigma-naive}) in terms of a Poisson distribution which can be more efficiently computed, but this is still an approximation with $q_s$ terms, and notably deviates from the true $\sigma$ when $q_s \gg 2^h$.
 
 In the following section, we derive an \emph{exact} closed-form formula for $\sigma$, requiring only $O(k)$ computations.
 

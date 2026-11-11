@@ -124,10 +124,10 @@ if __name__ == "__main__":
     bhk_sigma, bhk_loops = compute_sigma_BHK19(2**h, a, k, sigs, tsec)
     fd_sigma, fd_loops = compute_sigma_FD25(2**h, a, k, sigs, tsec)
 
-    bhk_off_pct = 100 * abs(our_sigma - bhk_sigma) / our_sigma
-    fd_off_pct = 100 * abs(our_sigma - fd_sigma) / our_sigma
+    bhk_err_pct = 100 * abs(our_sigma - bhk_sigma) / our_sigma
+    fd_err_pct = 100 * abs(our_sigma - fd_sigma) / our_sigma
 
     print(name)
     print(f'  Ours (exact):        sigma = 2**{log2(our_sigma):.19f} ({our_loops} loops)')
-    print(f'  BHK19 approximation: sigma = 2**{log2(bhk_sigma):.19f} ({bhk_loops} loops, {bhk_off_pct:.8f}% error)')
-    print(f'  FD25 approximation:  sigma = 2**{log2(fd_sigma):.19f} ({fd_loops} loops, {fd_off_pct:.8f}% error)')
+    print(f'  BHK19 approximation: sigma = 2**{log2(bhk_sigma):.19f} ({bhk_loops} loops, {bhk_err_pct:.8f}% error)')
+    print(f'  FD25 approximation:  sigma = 2**{log2(fd_sigma):.19f} ({fd_loops} loops, {fd_err_pct:.8f}% error)')

@@ -1,0 +1,28 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.lof
+*.lot
+*.ind
+*.idx
+*.ilg
+*.ist
+*.glo
+*.gls
+*.nlg
+*.nls
+
+# Compiled PDF
+/spx_sec_formula.pdf
+
+# Editor / OS cruft
+*.swp
+*~
+.DS_Store

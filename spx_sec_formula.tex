@@ -1,0 +1,127 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[margin=1.5in]{geometry}
+\usepackage[hidelinks,
+            colorlinks=true,
+            linkcolor=black,
+            urlcolor=blue]{hyperref}
+
+\newcommand{\spx}{SPHINCS$^+$}
+
+\title{A Fast Formula for Generic Security of SPHINCS$^+$}
+
+\author{conduition \\ \href{https://brink.dev}{\emph{Brink Technology}} \\ \small \texttt{conduition@proton.me}}
+
+\date{2026-11-11}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Generic attacks on \spx are feasible if a signer reveals a sufficient number of signatures. Finding the exact probability of a successful generic forgery attempt requires computing a sum with a number of terms linear in the number of \spx signing oracle queries, which may be as high as $2^{64}$, and in practice even approximations require thousands of terms for sufficient accuracy. In this note we derive a closed-form solution for the generic ITSR security of \spx requiring only $k+1$ terms computed with high precision.
+\end{abstract}
+
+{\let\thefootnote\relax \footnotetext{This work is fully human-authored, made possible by a Brink grant.}}
+
+\newpage
+\section{Introduction}
+
+We focus on the NIST-standardized \spx scheme, with FORS as its few-time signature component \cite{sphincsplus}.
+
+Let $h$ be the height of the \spx hypertree. Let $q_s$ be the number of signing queries. Let $k$ be the number of FORS trees, and $a$ their height.
+
+\emph{Interleaved target subset resilience} (ITSR) is the security notion governing \spx forgery security with-respect to FORS key overuse. In \cite{sphincsplus} section 5, the authors derive a closed-form formula for ITSR security assuming the message hashing function is a random keyed function. We briefly review their formula.
+
+They write $\mathrm{DarkSide}_\gamma$ for the probability that after exactly $\gamma$ signatures issued by a FORS key, a forgery attempt hits an exposed leaf in a FORS tree. Expanded, we have
+
+\begin{equation}
+  \mathrm{DarkSide}_\gamma := 1 - \left( 1 - \frac{1}{2^a} \right)^\gamma
+\end{equation}
+
+The overall \spx generic ITSR forgery probability $\sigma$ is then defined as a sum over the forgery probabilities for each possible number of revealed signatures.
+
+\begin{align}
+\label{eq:sigma-naive}
+  \sigma &:= \sum_{\gamma=1}^{q_s} \mathrm{DarkSide}^k_\gamma \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^{h}} \right)^\gamma \\
+  &= \sum_{\gamma=1}^{q_s} \left( 1 - \left( 1 - \frac{1}{2^a} \right)^\gamma \right)^k \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^{h}} \right)^\gamma
+\end{align}
+
+$\lambda = -\log_2 \sigma$ is precisely the ``bit security" level of \spx against generic FORS forgery attacks.
+
+Computing $\sigma$ precisely requires evaluating this sum over $q_s$ terms, which for many parameter sets is exceedingly large, e.g. $q_s = 2^{64}$ for NIST's SLH-DSA parameter sets \cite{fips205}.
+
+Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the leading terms until the contributions of additional terms fall below some threshold. This is imprecise, and does not scale when $q_s \gg 2^h$.
+
+In the following section, we derive an exact closed-form formula for $\sigma$, requiring only $O(k)$ computations.
+
+\section{Derivation}
+
+Expand $\mathrm{DarkSide}^k_\gamma$ with the binomial theorem identity $(x + y)^n = \sum_{i=0}^n \binom{n}{i} x^i y^{n-i}$.
+
+\begin{align}
+  \mathrm{DarkSide}^k_\gamma
+    &= \left( 1 - \left( 1 - \frac{1}{2^a} \right)^\gamma \right)^k \\
+    &= \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma}
+\end{align}
+
+Let $P_\text{select}(\gamma) := \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^h} \right)^\gamma$ be the binomial probability of exactly $\gamma$ successes after $q_s$ trials, with a per-trial success rate of $\frac{1}{2^h}$.
+
+Substitute into the formula for $\sigma$ (\ref{eq:sigma-naive}).
+
+\begin{align}
+  \sigma &= \sum_{\gamma=1}^{q_s} \mathrm{DarkSide}^k_\gamma \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^{h}} \right)^\gamma \\
+         &= \sum_{\gamma=1}^{q_s} \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma} P_\text{select}(\gamma)
+\end{align}
+
+Since $\mathrm{DarkSide}_0 = 0$, we may extend the sum to include a $\gamma = 0$ term which contributes nothing. Then swap the sums and factor out.\footnote{Intuitively: with zero preimages exposed, the attacker cannot hit any of them.}
+
+\begin{align}
+  \sigma &= \sum_{\gamma=0}^{q_s} \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma} P_\text{select}(\gamma)\\
+         &= \sum_{i=0}^k \sum_{\gamma=0}^{q_s} \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma} P_\text{select}(\gamma) \\
+         &= \sum_{i=0}^k \binom{k}{i} (-1)^i \sum_{\gamma=0}^{q_s} \left[ \left( 1 - \frac{1}{2^a} \right)^i \right]^\gamma P_\text{select}(\gamma)
+\end{align}
+
+Let $t(i) = \left( 1 - \frac{1}{2^a} \right)^i$.
+
+\begin{equation}
+  \sigma = \sum_{i=0}^k \binom{k}{i} (-1)^i \sum_{\gamma=0}^{q_s} t(i)^\gamma \cdot P_\text{select}(\gamma)
+\end{equation}
+
+Note that $P_\text{select}$ is a binomial probability mass function, so the inner sum is a \emph{probability generating function} (PGF) giving the expected value of $t(i)^X$ for random variable $X \sim \mathrm{Binomial} \left( q_s, \frac{1}{2^h} \right)$.
+
+\begin{equation}
+  \sigma = \sum_{i=0}^k \binom{k}{i} (-1)^i \cdot \mathbb E \left[ t(i)^X \right]
+\end{equation}
+
+The binomial PGF has a closed form, again using the binomial theorem identity.
+
+\begin{align}
+  \mathbb E \left[ t(i)^X \right]
+    &= \sum_{\gamma=0}^{q_s} t(i)^\gamma \cdot P_\text{select}(\gamma) \\
+    &= \sum_{\gamma=0}^{q_s} t(i)^\gamma \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^h} \right)^\gamma \\
+    &= \sum_{\gamma=0}^{q_s} \binom{q_s}{\gamma} \left( \frac{t(i)}{2^h} \right)^\gamma \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma}  \\
+    &= \left( \frac{t(i)}{2^h} + \left(1 - \frac{1}{2^h} \right) \right)^{q_s} \\
+    &= \left(1 +  \frac{t(i) - 1}{2^h} \right)^{q_s} \\
+    &= \left(1 - \frac{1 - t(i)}{2^h} \right)^{q_s} \\
+    &= \left(1 - \frac{1 - \left( 1 - \frac{1}{2^a} \right)^i}{2^h} \right)^{q_s}
+\end{align}
+
+This gives a closed-form solution for $\sigma$ with only $k+1$ terms.
+
+\begin{equation}
+\boxed{
+  \sigma = \sum_{i=0}^k \binom{k}{i} (-1)^i \cdot \left(1 - \frac{1 - \left( 1 - \frac{1}{2^a} \right)^i}{2^h} \right)^{q_s}
+}
+\end{equation}
+
+We note the formula experiences catastrophic cancellation, and so requires floating point precision of at least $\log_2 \left( \frac{\binom{k}{\lfloor k/2 \rfloor}}{\sigma} \right)$ bits.
+
+\newpage
+\bibliography{references}
+\bibliographystyle{alpha}
+
+\end{document}

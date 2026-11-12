@@ -3,6 +3,7 @@
 from decimal import Decimal, getcontext
 from math import log2, log10, comb, e, factorial
 from collections.abc import Hashable
+import timeit
 
 
 #### Generic caching layer to save time
@@ -124,16 +125,41 @@ PARAMETER_SETS = {
   'perf_stress_3': [48, 20, 32, 2**64, 128],
 }
 
+class _TimedCall:
+  """Wraps a zero-arg callable so it can be timed by timeit while capturing
+  its single return value (the wrapped function runs exactly once)."""
+  def __init__(self, fn):
+    self.fn = fn
+    self.result = None
+  def __call__(self):
+    self.result = self.fn()
+
+
 if __name__ == "__main__":
   for name, [h, a, k, sigs, tsec] in PARAMETER_SETS.items():
-    our_sigma, our_loops = compute_sigma_ours(2**h, a, k, sigs, tsec)
-    bhk_sigma, bhk_loops = compute_sigma_BHK19(2**h, a, k, sigs, tsec)
-    fd_sigma, fd_loops = compute_sigma_FD25(2**h, a, k, sigs, tsec)
+    # Time each computation with a single iteration (timeit), capturing its
+    # result so the function is only run once per parameter set.
+    our_call = _TimedCall(lambda: compute_sigma_ours(2**h, a, k, sigs, tsec))
+    bhk_call = _TimedCall(lambda: compute_sigma_BHK19(2**h, a, k, sigs, tsec))
+    fd_call = _TimedCall(lambda: compute_sigma_FD25(2**h, a, k, sigs, tsec))
+    our_t = timeit.timeit(our_call, number=1)
+    bhk_t = timeit.timeit(bhk_call, number=1)
+    fd_t = timeit.timeit(fd_call, number=1)
+
+    our_sigma, our_loops = our_call.result
+    bhk_sigma, bhk_loops = bhk_call.result
+    fd_sigma, fd_loops = fd_call.result
 
     bhk_err_pct = 100 * abs(our_sigma - bhk_sigma) / our_sigma
     fd_err_pct = 100 * abs(our_sigma - fd_sigma) / our_sigma
 
     print(name)
-    print(f'  Ours (exact):        sigma = 2**{log2(our_sigma):.19f} ({our_loops} loops)')
-    print(f'  BHK19 approximation: sigma = 2**{log2(bhk_sigma):.19f} ({bhk_loops} loops, {bhk_err_pct:.8f}% error)')
-    print(f'  FD25 approximation:  sigma = 2**{log2(fd_sigma):.19f} ({fd_loops} loops, {fd_err_pct:.8f}% error)')
+    print(f'  Ours (exact):        '
+          f'sigma = 2**{log2(our_sigma):.19f} '
+          f'({our_loops} loops, {our_t:.6f}s)')
+    print(f'  BHK19 approximation: '
+          f'sigma = 2**{log2(bhk_sigma):.19f} '
+          f'({bhk_loops} loops, {bhk_err_pct:.8f}% error, {bhk_t:.6f}s)')
+    print(f'  FD25 approximation:  '
+          f'sigma = 2**{log2(fd_sigma):.19f} '
+          f'({fd_loops} loops, {fd_err_pct:.8f}% error, {fd_t:.6f}s)')

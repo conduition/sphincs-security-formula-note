@@ -22,12 +22,6 @@ class memoized(object):
 
 #### SPHINCS+ analysis
 
-# Pr[exactly r sigs hit the leaf targeted by this forgery attempt]
-@memoized
-def qhitprob(leaves, qs, r):
-  p = 1 / Decimal(leaves)
-  return comb(qs, r) * p**r * (1 - p)**(qs - r)
-
 # Pr[FORS forgery given that exactly r sigs hit the leaf] = (1-(1-1/(2^a))^r)^k
 @memoized
 def forgeryprob(a, r, k):
@@ -48,13 +42,17 @@ def poisson_pmf(rate, n_events):
 
 getcontext().prec = int(log10(2**768)) + 1  # ~232 digits: headroom for catastrophic cancellation
 
-
-# Original SPHINCS+ paper's formula
+# Original SPHINCS+ paper's formula, improved by building the
+# binomial pmf incrementally:  pmf_p(r) = pmf_p(r-1) * (sigs-r+1)/r * p/(1-p).
+# This avoids recomputing comb(sigs, r) from scratch every step.
 def compute_sigma_BHK19(leaves, a, k, sigs, tsec):
   sigma = Decimal(0)
-  done = qhitprob(leaves, sigs, 0)
+  p = Decimal(1) / Decimal(leaves)
+  q = Decimal(1) - p
+  t = q ** sigs # pmf(0) = (1 - 1/leaves)**sigs
+  done = t
   for r in range(1, sigs + 1):
-    t = qhitprob(leaves, sigs, r)
+    t = t * (Decimal(sigs) - r + 1) / Decimal(r) * (p / q)   # pmf(r)
     term = t * forgeryprob(a, r, k)
     sigma += term
     done += t

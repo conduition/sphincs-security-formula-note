@@ -2,26 +2,46 @@
 
 from decimal import Decimal, getcontext
 from math import log2, log10, comb, e, factorial
+from collections.abc import Hashable
+
+
+#### Generic caching layer to save time
+class memoized(object):
+  def __init__(self,func):
+    self.func = func
+    self.cache = {}
+    self.__name__ = 'memoized:' + func.__name__
+  def __call__(self,*args):
+    if not isinstance(args, Hashable):
+      return self.func(*args)
+    if not args in self.cache:
+      self.cache[args] = self.func(*args)
+    return self.cache[args]
 
 
 #### SPHINCS+ analysis
 
 # Pr[exactly r sigs hit the leaf targeted by this forgery attempt]
+@memoized
 def qhitprob(leaves, qs, r):
   p = 1 / Decimal(leaves)
   return comb(qs, r) * p**r * (1 - p)**(qs - r)
 
 # Pr[FORS forgery given that exactly r sigs hit the leaf] = (1-(1-1/(2^a))^r)^k
+@memoized
 def forgeryprob(a, r, k):
   if k == 1: return 1 - (1 - 1 / Decimal(2**a))**r
   return forgeryprob(a, r, 1) * forgeryprob(a, r, k-1)
 
+@memoized
 def sigmalimit(tsec):
   return 1 / Decimal(2**tsec)
 
+@memoized
 def donelimit(tsec):
   return 1 - sigmalimit(tsec) / Decimal(2**20)
 
+@memoized
 def poisson_pmf(rate, n_events):
   return rate**n_events * Decimal(e)**(-rate) / factorial(n_events)
 

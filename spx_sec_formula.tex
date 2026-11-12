@@ -117,6 +117,7 @@ The binomial PGF has a closed form, again using the binomial theorem identity.
 This gives a closed-form solution for $\sigma$ with only $k+1$ terms.
 
 \begin{equation}
+\label{eq:closed}
 \boxed{
   \sigma = \sum_{i=0}^k \binom{k}{i} (-1)^i \cdot \left(1 - \frac{1 - \left( 1 - \frac{1}{2^a} \right)^i}{2^h} \right)^{q_s}
 }
@@ -126,6 +127,11 @@ This offers an efficient formula for the exact \spx ITSR bit-security level agai
 
 We note the sum experiences catastrophic cancellation, and so requires numeric precision of at least $\log_2 \left( \frac{\binom{k}{\lfloor k/2 \rfloor}}{\sigma} \right)$ bits.
 
+\section{Implementation}
+
+We provide a supplemental implementation of the exact formula from (\ref{eq:closed}) in Python, and empirically compare our formula against the approximations from \cite{sphincsplus, smaller_sphincs} on various \spx parameter sets. It is available at
+
+\url{https://github.com/conduition/sphincs-itsr-formula-note}
 
 \newpage
 \bibliography{references}

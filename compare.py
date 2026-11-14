@@ -37,6 +37,10 @@ def donelimit(tsec):
   return 1 - sigmalimit(tsec) / Decimal(2**20)
 
 @memoized
+def termlimit(tsec):
+  return sigmalimit(tsec) / Decimal(2**20)
+
+@memoized
 def poisson_pmf(rate, n_events):
   return rate**n_events * Decimal(e)**(-rate) / factorial(n_events)
 
@@ -56,7 +60,7 @@ def compute_sigma_BHK19(leaves, a, k, sigs, tsec):
     term = t * forgeryprob(a, r, k)
     sigma += term
     done += t
-    if done >= donelimit(tsec) and term < sigmalimit(tsec) / Decimal(2**20):
+    if done >= donelimit(tsec) and term < termlimit(tsec):
       break
   return (sigma, r)
 
@@ -70,7 +74,7 @@ def compute_sigma_FD25(leaves, a, k, sigs, tsec):
     term = t * forgeryprob(a, r, k)
     sigma += term
     done += t
-    if done >= donelimit(tsec) and term < sigmalimit(tsec) / Decimal(2**20):
+    if done >= donelimit(tsec) and term < termlimit(tsec):
       break
   return (sigma, r)
 
@@ -107,7 +111,7 @@ PARAMETER_SETS = {
   'rls128gp2': [45, 19, 6, 2**30, 128],
   'rls128gp3': [42, 24, 5, 2**30, 128],
 
-  # FD25 divergence cases: small hypertree (large per-leaf hit prob) makes the
+  # FD25 divergence cases: small query count (low per-leaf hit prob) makes the
   # Poisson approximation diverge from the exact binomial.  Sorted by severity.
   'fd_diverge_1': [10,  9, 33, 4, 256],
   'fd_diverge_2': [10,  6, 33, 4, 256],

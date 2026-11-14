@@ -65,7 +65,7 @@ def compute_sigma_BHK19(leaves, a, k, sigs, tsec):
   return (sigma, r)
 
 # Fluhrer & Dang's Poisson approximation.
-def compute_sigma_FD25(leaves, a, k, sigs, tsec):
+def compute_sigma_FD24(leaves, a, k, sigs, tsec):
   sigma = Decimal(0)
   rate = Decimal(sigs) / Decimal(leaves)
   done = Decimal(poisson_pmf(rate, 0))
@@ -111,7 +111,7 @@ PARAMETER_SETS = {
   'rls128gp2': [45, 19, 6, 2**30, 128],
   'rls128gp3': [42, 24, 5, 2**30, 128],
 
-  # FD25 divergence cases: small query count (low per-leaf hit prob) makes the
+  # FD24 divergence cases: small query count (low per-leaf hit prob) makes the
   # Poisson approximation diverge from the exact binomial.  Sorted by severity.
   'fd_diverge_1': [10,  9, 33, 4, 256],
   'fd_diverge_2': [10,  6, 33, 4, 256],
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     # result so the function is only run once per parameter set.
     our_call = _TimedCall(lambda: compute_sigma_ours(2**h, a, k, sigs, tsec))
     bhk_call = _TimedCall(lambda: compute_sigma_BHK19(2**h, a, k, sigs, tsec))
-    fd_call = _TimedCall(lambda: compute_sigma_FD25(2**h, a, k, sigs, tsec))
+    fd_call = _TimedCall(lambda: compute_sigma_FD24(2**h, a, k, sigs, tsec))
     our_t = timeit.timeit(our_call, number=1)
     bhk_t = timeit.timeit(bhk_call, number=1)
     fd_t = timeit.timeit(fd_call, number=1)
@@ -160,6 +160,6 @@ if __name__ == "__main__":
     print(f'  BHK19 approximation: '
           f'sigma = 2**{log2(bhk_sigma):.19f} '
           f'({bhk_loops} loops, {bhk_err_pct:.8f}% error, {bhk_t:.6f}s)')
-    print(f'  FD25 approximation:  '
+    print(f'  FD24 approximation:  '
           f'sigma = 2**{log2(fd_sigma):.19f} '
           f'({fd_loops} loops, {fd_err_pct:.8f}% error, {fd_t:.6f}s)')

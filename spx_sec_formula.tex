@@ -366,11 +366,11 @@ Let $\Delta$ denote the \emph{forward difference} operator.
   (\Delta f)(\gamma) = f(\gamma + 1) - f(\gamma)
 \end{equation}
 
-Let $\Delta^j f$ denote the $j$-th iteration of $\Delta$ on $f$.
+Let $\Delta^\ell f$ denote the $\ell$-th iteration of $\Delta$ on $f$.
 
 \begin{align}
-  (\Delta^j f)(\gamma) &= \left(\Delta (\Delta^{j-1} f) \right)(\gamma) \\
-    &= (\Delta^{j-1} f)(\gamma + 1) - (\Delta^{j-1} f)(\gamma)
+  (\Delta^\ell f)(\gamma) &= \left(\Delta (\Delta^{\ell-1} f) \right)(\gamma) \\
+    &= (\Delta^{\ell-1} f)(\gamma + 1) - (\Delta^{\ell-1} f)(\gamma)
 \end{align}
 
 Apply $\Delta$ to the exponential polynomial form of $P_F$.
@@ -399,7 +399,7 @@ Note the first $\ell$ terms are dropped because each contains a factor $\binom{\
 
 Concretely: \textbf{Evaluating $\Delta^\ell P_F(0)$ gives the coefficient $c_\ell$.} In practice one could compute $\Delta^\ell P_F(0)$ using only the forward difference definition from (\ref{eq:forward-diff}) by building a table of evaluations of $P_F$, but we seek a closed form to compute the coefficients analytically.
 
-Let $(S f)(\gamma) := f(\gamma + 1)$ be the shift operator, and let $(I f)(\gamma) = f(\gamma)$ be the identity operator. We can write $\Delta = S - I$, and $\Delta^j = (S - I)^j$.
+Let $(S f)(\gamma) := f(\gamma + 1)$ be the shift operator, and let $(I f)(\gamma) = f(\gamma)$ be the identity operator. We can write $\Delta = S - I$, and $\Delta^\ell = (S - I)^\ell$.
 
 $S$ and $I$ commute as operators under composition ($I$ is trivially commutative). By the binomial identity for commutative operators,
 

@@ -22,7 +22,7 @@
 \maketitle
 
 \begin{abstract}
-Generic attacks on SPHINCS$^+$ are feasible if a signer reveals a sufficient number of few-time signatures. Finding the exact probability of a successful generic forgery attempt typically requires computing a sum with a number of terms linear in the number of SPHINCS$^+$ signing oracle queries, which may be as high as $2^{64}$, and in practice even approximations require thousands of terms (or more) for sufficient accuracy on some parameter sets. In this note we derive an efficient formula for the generic security of any SPHINCS$^+$ parameter set, requiring only $k+1$ terms computed with high precision. We then generalize to acquire a closed-form formula for the generic security of any SPHINCS$^+$ instance whose few-time signature scheme's forgery security can be written as an exponential polynomial - This includes well-known schemes such as PORS+FP.
+Generic attacks on SPHINCS$^+$ are feasible if a signer reveals a sufficient number of few-time signatures. Finding the exact probability of a successful generic forgery attempt typically requires computing a sum with a number of terms linear in the number of SPHINCS$^+$ signing oracle queries, which may be as high as $2^{64}$, and in practice even approximations require thousands of terms (or more) for sufficient accuracy on some parameter sets. In this note we derive an efficient formula for the generic security of any SPHINCS$^+$ parameter set, requiring only $k+1$ terms computed with high precision. We then generalize to acquire a novel closed-form formula for the generic security of any SPHINCS$^+$ instance whose few-time signature scheme's forgery security can be written as an exponential polynomial. This includes well-known schemes such as PORS+FP.
 \end{abstract}
 
 {\let\thefootnote\relax \footnotetext{This work is fully human-authored, made possible by a Brink grant.}}
@@ -30,11 +30,13 @@ Generic attacks on SPHINCS$^+$ are feasible if a signer reveals a sufficient num
 \newpage
 \section{Introduction}
 
+\spx \cite{sphincsplus} is a stateless hash-based digital signature algorithm which uses a large virtual merkle tree called a hypertree, whose leaves are one-time signature keys that each certify a few-time signature (FTS) key at the bottom. The FTS keys then sign actual messages or documents.
+
 We begin with a focus on the NIST-standardized \spx instance called SLH-DSA, with FORS as its few-time signature component \cite{sphincsplus}.
 
 Let $h$ be the height of the \spx hypertree. Let $q_s$ be the number of signing queries. Let $k$ be the number of FORS trees, and $a$ their height.
 
-\emph{Interleaved target subset resilience} (ITSR) is the security notion governing \spx forgery security with-respect to FORS key overuse. In \cite{sphincsplus} section 5, the authors derive a closed-form formula for ITSR security assuming the message hashing function is a random keyed function. We briefly review their formula.
+\emph{Interleaved target subset resilience} (ITSR) is the security notion governing \spx forgery security with respect to FORS key overuse. In \cite{sphincsplus} section 5, the authors derive a closed-form formula for ITSR security assuming the message hashing function is a random keyed function. We briefly review their formula.
 
 Bernstein et al. write $\mathrm{DarkSide}_\gamma$ for the probability that after exactly $\gamma$ signatures issued by a FORS key, a forgery attempt hits an exposed leaf in a FORS tree. Expanded, we have
 
@@ -124,7 +126,7 @@ The binomial PGF has a closed form, again using the binomial theorem identity.
 This gives a closed-form solution for $\sigma$ with only $k+1$ terms.
 
 \begin{equation}
-\label{eq:fors-closed}.
+\label{eq:fors-closed}
 \boxed{
   \sigma = \sum_{i=0}^k \binom{k}{i} (-1)^i \cdot \left(1 - \frac{1 - \left( 1 - \frac{1}{2^a} \right)^i}{2^h} \right)^{q_s}
 }

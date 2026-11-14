@@ -145,6 +145,12 @@ We provide a supplemental implementation of the exact formula from (\ref{eq:fors
 
 \url{https://github.com/conduition/sphincs-security-formula-note}
 
+\medskip
+
+We find that our algorithm's fidelity to the original \cite{sphincsplus} formula is tight across parameter sets, whereas our implementation of the \cite{smaller_sphincs} formula incurs significant errors (as much as 3 bits of security).
+
+We further find \cite{sphincsplus} and \cite{smaller_sphincs} formulas experience significant slowdowns, taking several seconds to compute security for some parameter sets and failing to return at all for others. Our algorithm's performance is fast and stable across all tested parameter sets.
+
 \section{Generalization}
 
 While FORS is the FTS scheme standardized for \spx in FIPS-205, novel FTS schemes have since been proposed. Upon finding an efficient formula for FORS security in \spx, the natural response is to inquire after a general formula.

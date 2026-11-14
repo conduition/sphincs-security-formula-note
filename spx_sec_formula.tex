@@ -22,7 +22,7 @@
 \maketitle
 
 \begin{abstract}
-Generic attacks on SPHINCS$^+$ are feasible if a signer reveals a sufficient number of few-time signatures. Finding the exact probability of a successful generic forgery attempt typically requires computing a sum with a number of terms linear in the number of SPHINCS$^+$ signing oracle queries, which may be as high as $2^{64}$, and in practice even approximations require thousands of terms (or more) for sufficient accuracy on some parameter sets. In this note we derive an efficient formula for the generic security of any SPHINCS$^+$ parameter set, requiring only $k+1$ terms computed with high precision. We then generalize to acquire a novel closed-form formula for the generic security of any SPHINCS$^+$ instance whose few-time signature scheme's forgery security can be written as an exponential polynomial. This includes well-known schemes such as PORS+FP.
+Generic attacks on SPHINCS$^+$ are feasible if a signer reveals a sufficient number of few-time signatures. Finding the exact probability of a successful generic forgery attempt typically requires computing a sum with a number of terms linear in the number of SPHINCS$^+$ signing oracle queries, which may be as high as $2^{64}$. In practice, even approximations of this sum require thousands of terms or more for sufficient accuracy on some parameter sets, and for other parameter sets, it cannot be computed at all. In this note we derive an efficient formula for the generic security of any SPHINCS$^+$ parameter set, requiring only $k+1$ terms computed with high precision. We then generalize to acquire a novel closed-form formula for the generic security of any SPHINCS$^+$ instance whose few-time signature scheme's forgery security can be written as an exponential polynomial. This includes newer well-known FTS schemes such as PORS+FP.
 \end{abstract}
 
 {\let\thefootnote\relax \footnotetext{This work is fully human-authored, made possible by a Brink grant.}}
@@ -32,11 +32,13 @@ Generic attacks on SPHINCS$^+$ are feasible if a signer reveals a sufficient num
 
 \spx \cite{sphincsplus} is a stateless hash-based digital signature algorithm which uses a large virtual merkle tree called a hypertree, whose leaves are one-time signature keys that each certify a few-time signature (FTS) key at the bottom. The FTS keys then sign actual messages or documents.
 
-We begin with a focus on the NIST-standardized \spx instance called SLH-DSA, with FORS as its few-time signature component \cite{sphincsplus}.
+We begin with a focus on the NIST-standardized \spx instance called SLH-DSA \cite{fips205}, which uses FORS \cite{sphincsplus} as its few-time signature component.
+
+\emph{Interleaved target subset resilience} (ITSR) is the security notion governing \spx forgery security with respect to FORS key overuse. In \cite{sphincsplus} Section 5, the authors derive a closed-form formula for ITSR security of \spx assuming the message hashing function is a random keyed function. We briefly review their formula.
+
+\bigskip
 
 Let $h$ be the height of the \spx hypertree. Let $q_s$ be the number of signing queries. Let $k$ be the number of FORS trees, and $a$ their height.
-
-\emph{Interleaved target subset resilience} (ITSR) is the security notion governing \spx forgery security with respect to FORS key overuse. In \cite{sphincsplus} section 5, the authors derive a closed-form formula for ITSR security assuming the message hashing function is a random keyed function. We briefly review their formula.
 
 Bernstein et al. write $\mathrm{DarkSide}_\gamma$ for the probability that after exactly $\gamma$ signatures issued by a FORS key, a forgery attempt hits an exposed leaf in a FORS tree. Expanded, we have
 
@@ -56,9 +58,9 @@ $\lambda = -\log_2 \sigma$ is precisely the ``bit security" level of \spx agains
 
 \section{Motivation}
 
-Computing $\sigma$ precisely requires evaluating the sum in (\ref{eq:sigma-naive}) over $q_s$ terms, which for many parameter sets is exceedingly large, e.g. $q_s = 2^{64}$ for NIST's SLH-DSA parameter sets \cite{fips205}.
+Computing $\sigma$ precisely requires evaluating the sum (\ref{eq:sigma-naive}) over $q_s$ terms, which for many parameter sets is exceedingly large, e.g. $q_s = 2^{64}$ for SLH-DSA parameter sets \cite{fips205}.
 
-Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the heaviest (low degree) terms until the contributions of additional terms fall below some threshold. This is imprecise, and does not scale when $q_s \gg 2^h$.
+Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the heaviest terms until the contributions of additional terms fall below some threshold. This affords sufficient precision for many parameter sets, but does not scale when $q_s \gg 2^h$, and is slow (or sometimes infeasible) to compute when the terms decay more slowly.
 
 \cite{smaller_sphincs} (Section 5) gives an approximation of (\ref{eq:sigma-naive}) in terms of a Poisson distribution which can be more efficiently computed per term, but it is still an approximation which deviates from the true $\sigma$ when $q_s \ll 2^h$.
 
@@ -67,11 +69,12 @@ In the following section, we derive an \emph{exact} closed-form formula for $\si
 \section{FORS}
 \label{sec:fors}
 
-Expand $\mathrm{DarkSide}^k_\gamma$ with the binomial theorem identity $(x + y)^n = \sum_{i=0}^n \binom{n}{i} x^i y^{n-i}$.
+Expand $\mathrm{DarkSide}^k_\gamma$ with the binomial theorem identity $(x + y)^n = \sum_{i=0}^n \binom{n}{i} x^i y^{n-i}$ where $x = - \left( 1 - \frac{1}{2^a} \right)^\gamma$ and $y=1$.
 
 \begin{align}
   \mathrm{DarkSide}^k_\gamma
     &= \left( 1 - \left( 1 - \frac{1}{2^a} \right)^\gamma \right)^k \\
+    &= \sum_{i=0}^k \binom{k}{i} 1^{k-i} \left(- \left(1 - \frac{1}{2^a} \right)^\gamma \right)^i \\
     &= \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma}
 \end{align}
 
@@ -81,7 +84,7 @@ Let
   P_\text{select}(\gamma) := \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^h} \right)^\gamma
 \end{equation}
 
-be the binomial probability of exactly $\gamma$ successes after $q_s$ trials, with a per-trial success rate of $\frac{1}{2^h}$.
+be the binomial probability mass function, giving the chance of exactly $\gamma$ successes after $q_s$ trials with a per-trial success rate of $\frac{1}{2^h}$.
 
 Substitute into (\ref{eq:sigma-naive}).
 
@@ -110,7 +113,7 @@ Note that $P_\text{select}$ is a binomial probability mass function, so the inne
   \sigma = \sum_{i=0}^k \binom{k}{i} (-1)^i \cdot \mathbb E \left[ t(i)^X \right]
 \end{equation}
 
-The binomial PGF has a closed form, again using the binomial theorem identity.
+The binomial PGF has a closed form, again using the binomial theorem identity, with $x = \frac{t(i)}{2^h}$ and $y = 1 - \frac{1}{2^h}$.
 
 \begin{align}
   \mathbb E \left[ t(i)^X \right]
@@ -132,7 +135,7 @@ This gives a closed-form solution for $\sigma$ with only $k+1$ terms.
 }
 \end{equation}
 
-This offers an efficient formula for the exact \spx ITSR bit-security level against generic attacks: $\lambda = - \log_2 \sigma$.
+We thus obtain an efficient formula for the exact \spx ITSR bit-security level against generic attacks: $\lambda = - \log_2 \sigma$.
 
 We note the sum experiences catastrophic cancellation, and so requires numeric precision of at least $\log_2 \left( \frac{\binom{k}{\lfloor k/2 \rfloor}}{\sigma} \right)$ bits.
 
@@ -144,9 +147,9 @@ We provide a supplemental implementation of the exact formula from (\ref{eq:fors
 
 \section{Generalization}
 
-While FORS is the FTS scheme standardized for \spx in FIPS-205, novel FTS schemes have since been proposed.
+While FORS is the FTS scheme standardized for \spx in FIPS-205, novel FTS schemes have since been proposed. Upon finding an efficient formula for FORS security in \spx, the natural response is to inquire after a general formula.
 
-In this section, we generalize the derivation from Section \ref{sec:fors} so that it may be applied to (claimed) security bounds in proposed FTS schemes such as PORS+FP \cite{forced_pruning} or BPORS+FP \cite{bucket_thinning}.
+In this section we derive exactly such a formula for any FTS scheme whose forgery probability can be expressed as an exponential polynomial function in the number of exposed signatures per key. This can then be applied to derive the (claimed) security bounds in proposed FTS schemes such as PORS+FP \cite{forced_pruning} or BPORS+FP \cite{bucket_thinning}.
 
 Let $P_F(\gamma)$ be a function that returns the forgery probability of an FTS scheme $F$ after $\gamma$ signatures released by a key. When scheme $F$ is used in \spx, the upper bound for the generic forgery probability $\sigma_F$ of a public key after releasing $q_s$ signatures is
 
@@ -155,6 +158,8 @@ Let $P_F(\gamma)$ be a function that returns the forgery probability of an FTS s
     &\le \sum_{\gamma=0}^{q_s} \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^h} \right)^\gamma P_F(\gamma) \\
     &= \sum_{\gamma=0}^{q_s} P_\text{select}(\gamma) \cdot P_F(\gamma)
 \end{align}
+
+This is simply a general restatement of (\ref{eq:sigma-naive}), the formula from \cite{sphincsplus}.
 
 Recalling that $P_\text{select}$ is the binomial PMF:
 
@@ -165,25 +170,22 @@ Recalling that $P_\text{select}$ is the binomial PMF:
   \sigma_F \le \mathbb E \left[ P_F(X) \right]
 \end{equation}
 
-For convenience, let $p = \frac{1}{2^h}$ and let $\mathcal W(g) := \mathbb E \left[ g(X) \right]$ for $X \sim \mathrm{Binomial} \left( q_s, p \right)$.
+For convenience, let $p = \frac{1}{2^h}$ and let $X \sim \mathrm{Binomial} \left( q_s, p \right)$ be a random variable.
 
 \begin{align}
-  \mathcal W(g)
-    &:= \sum_{\gamma=0}^{q_s} P_\text{select}(\gamma) \cdot g(\gamma) \\
+  \mathbb E[g(X)]
+    &= \sum_{\gamma=0}^{q_s} P_\text{select}(\gamma) \cdot g(\gamma) \\
     &= \sum_{\gamma=0}^{q_s} \binom{q_s}{\gamma} \left( 1 - p \right)^{q_s - \gamma} p^\gamma g(\gamma)
     \label{eq:exp-op}
 \end{align}
 
-\paragraph{$\mathcal W$ is linear.} This follows from the fact that the expectation of sums is the sum of expectations.
+Recall expectations are linear: the expectation of sums is the sum of expectations.
 
 \begin{equation}
   \mathbb E[a(X) + b(X)] = \mathbb E[a(X)] + \mathbb E[b(X)]
 \end{equation}
-\begin{equation}
-  \mathcal W(a + b) = \mathcal W(a) + \mathcal W(b)
-\end{equation}
 
-To compute $\mathcal W(g)$, we break $g$ down into $M$ additive pieces $\{g_1, g_2, \ldots, g_M\}$ such that
+To compute $\mathbb E[g(X)]$, we break $g$ down into $M$ additive pieces $\{g_1, g_2, \ldots, g_M\}$ such that
 
 \begin{equation}
   g(\gamma) = \sum_{i=1}^M g_i(\gamma)
@@ -192,23 +194,23 @@ To compute $\mathcal W(g)$, we break $g$ down into $M$ additive pieces $\{g_1, g
 Then we will have
 
 \begin{equation}
-  \mathcal W(g) = \sum_{i=1}^M \mathcal W(g_i)
+  \mathbb E[g(X)] = \sum_{i=1}^M \mathbb E[g_i(X)]
 \end{equation}
 
 \bigskip
 
-We will show that there exists a broad class of functions for which this form of $\mathcal W(g)$ is efficiently computable, giving an upper bound for $\sigma_F$. Namely, we restrict $g$ to be an exponential polynomial
+We will show that there exists a broad class of functions for which this form of $\mathbb E[g(X)]$ is efficiently computable. Namely, we restrict $g$ to be an exponential polynomial of the form
 
 \begin{equation}
 \label{eq:exponential-polynomial}
   g(\gamma) := \sum_{i=1}^M f_i(\gamma) \cdot z_i^\gamma
 \end{equation}
 
-where $\{f_1, f_2, \ldots, f_M\}$ is a set of real polynomials, and $\{z_1, z_2, \ldots, z_M\}$ is a set of exponent bases.
+where $\{f_1, f_2, \ldots, f_M\}$ is a set of real polynomials, and $\{z_1, z_2, \ldots, z_M\}$ is a set of real exponent bases.
 
 Let $d_i := \deg f_i$.
 
-Write each polynomial $f_i(\gamma)$ using a binomial-coefficient basis,\footnote{Any $d$-degree polynomial $f(x) = \sum_{i=0}^d a_i x^i$ can be rewritten in binomial-coefficient basis, as $$f(x) = \sum_{i=0}^d \binom{x}{i} i! \sum_{j=i}^d a_j \cdot S(j, i)$$ where $S(j, i)$ denotes Stirling numbers of the second kind.} with coefficients $\{c_{i, 0}, c_{i, 1}, \ldots, c_{i, d_i}\}$.
+Write each polynomial $f_i(\gamma)$ using a \emph{binomial basis},\footnote{Any $d$-degree polynomial $f(x) = \sum_{i=0}^d a_i x^i$ can be rewritten in binomial basis, as $$f(x) = \sum_{i=0}^d \binom{x}{i} i! \sum_{j=i}^d a_j \cdot S(j, i)$$ where $S(j, i)$ denotes Stirling numbers of the second kind.} with coefficients $\{c_{i, 0}, c_{i, 1}, \ldots, c_{i, d_i}\}$.
 
 \begin{equation}
   f_i(\gamma) = \sum_{j=0}^{d_i} c_{i,j} \binom{\gamma}{j}
@@ -223,26 +225,26 @@ We then have $M$ components which sum to $g$.
   g(\gamma) = \sum_{i=1}^M g_i(\gamma)
 \end{equation}
 
-Recall that by linearity of $\mathcal W$, we have
+Recall that by linearity of expectations, we have
 
 \begin{equation}
 \label{eq:W-of-g}
-  \mathcal W(g) = \sum_{i=1}^M \mathcal W(g_i)
+  \mathbb E[g(X)] = \sum_{i=1}^M \mathbb E[g_i(X)]
 \end{equation}
 
-Focus on a single term $\mathcal W(g_i) = \mathbb E \left[ \sum_{j=0}^{d_i} c_{i,j} \binom{X}{j} \cdot z_i^X \right]$. Note none of the sum indices depend on the random variable $X$, and nor do the coefficients $\{c_{i,j}\}$. By linearity,
+Focus on a single term $\mathbb E[g_i(X)] = \mathbb E \left[ \sum_{j=0}^{d_i} c_{i,j} \binom{X}{j} \cdot z_i^X \right]$. Note none of the sum indices depend on the random variable $X$, and nor do the coefficients $\{c_{i,j}\}$. By linearity,
 
 \begin{equation}
    \mathbb E \left[ \sum_{j=0}^{d_i} c_{i,j} \binom{X}{j} \cdot z_i^X \right]
     = \sum_{j=0}^{d_i} c_{i,j} \cdot \mathbb E \left[ \binom{X}{j} \cdot z_i^X \right]
 \end{equation}
 
-We further refine our focus on computing $\mathcal W \left( \left[ \binom{X}{j} \cdot z^X \right] \right)$ for $j \in \mathbb N$, and $z \in \mathbb R$. Our goal will be to rearrange this definition into a form we can factor using the binomial theorem.
+We further refine our focus on computing $\mathbb E \left[ \binom{X}{j} \cdot z^X \right]$ for $j \in \mathbb N$, and $z \in \mathbb R$. Our goal will be to rearrange this definition into a form we can factor using the binomial theorem.
 
 Expand (\ref{eq:exp-op}).
 
 \begin{align}
-  \mathbb E \left[ \binom{X}{j} \cdot z_i^X \right]
+  \mathbb E \left[ \binom{X}{j} \cdot z^X \right]
     &= \sum_{\gamma=0}^{q_s} \binom{q_s}{\gamma} (1 - p)^{q_s - \gamma} p^\gamma \left( \binom{\gamma}{j} \cdot z^\gamma \right) \\
     &= \sum_{\gamma=0}^{q_s} \binom{q_s}{\gamma} \binom{\gamma}{j} (1 - p)^{q_s - \gamma} (pz)^\gamma
 \end{align}
@@ -267,31 +269,25 @@ Terms with $\gamma < j$ contribute nothing (the $\binom{q_s - j}{\gamma - j}$ fa
     &= (pz)^j \binom{q_s}{j} \sum_{\gamma=0}^{q_s - j} \binom{q_s - j}{\gamma} (1 - p)^{q_s - j - \gamma} (pz)^{\gamma}
 \end{align}
 
-We may now apply the binomial theorem to factor the sum,
-
-\begin{equation}
-  \sum_{\gamma=0}^N \binom{N}{\gamma} x^\gamma y^{N-\gamma} = (x + y)^N
-\end{equation}
-
-by substituting $N = q_s - j$; $x = pz$; $y = 1 - p$.
+We may now apply the binomial theorem $\sum_{\gamma=0}^n \binom{n}{\gamma} x^\gamma y^{n - \gamma} = (x + y)^n$ to factor the sum, by substituting $n = q_s - j$; $x = pz$; $y = 1 - p$.
 
 \begin{align}
-  \mathbb E \left[ \binom{X}{j} \cdot z_i^X \right]
+  \mathbb E \left[ \binom{X}{j} \cdot z^X \right]
     &= (pz)^j \binom{q_s}{j} \left(1 - p + pz \right)^{q_s - j}
 \end{align}
 
-Finally we can reconnect this thread of work to fully evaluate $\mathcal W$ on the exponential polynomial $g$ as in (\ref{eq:W-of-g}).
+Finally we can reconnect this thread of work to fully evaluate $\mathbb E[g(X)]$ as in (\ref{eq:W-of-g}).
 
 \begin{align}
-  \mathcal W(g)
-    &= \sum_{i = 1}^M \mathcal W(g_i) \\
+  \mathbb E[g(X)]
+    &= \sum_{i = 1}^M \mathbb E[g_i(X)] \\
     &= \sum_{i = 1}^M \sum_{j=0}^{d_i} c_{i, j} \cdot \mathbb E \left[ \binom{X}{j} \cdot z_i^X \right]
 \end{align}
 
 \begin{equation}
 \label{eq:generalization}
   \boxed{
-    \mathcal W(g) = \sum_{i = 1}^M \sum_{j=0}^{d_i} c_{i, j} (p z_i)^j \binom{q_s}{j} \left(1 - p + p z_i \right)^{q_s - j}
+    \mathbb E[g(X)] = \sum_{i = 1}^M \sum_{j=0}^{d_i} c_{i, j} (p z_i)^j \binom{q_s}{j} \left(1 - p + p z_i \right)^{q_s - j}
   }
 \end{equation}
 
@@ -299,11 +295,11 @@ This is an exact and closed-form formula to compute $\mathbb E [g(X)]$ for $X \s
 
 \subsection{Application}
 
-If an FTS forgery probability curve $P_F(\gamma)$ can be expressed as an exponential polynomial, as in (\ref{eq:exponential-polynomial}), then $\mathcal W(P_F)$ provides a closed-form upper bound for $\sigma_F$.
+If an FTS forgery probability function $P_F(\gamma)$ can be expressed as an exponential polynomial, as in (\ref{eq:exponential-polynomial}), then (\ref{eq:generalization}) provides a closed-form upper bound for $\sigma_F$. To demonstrate, we now apply (\ref{eq:generalization}) to two well-known few-time signature schemes: FORS and PORS+FP.
 
 \subsubsection{FORS}
 
-Applied to FORS, we have
+Applied to FORS with fixed parameters $a$ and $k$, we have
 
 \begin{equation}
   P_F(\gamma) = \mathrm{DarkSide}_\gamma^k = \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma}
@@ -320,7 +316,7 @@ Written as an exponential polynomial, as in (\ref{eq:exponential-polynomial}), w
   P_F(\gamma) = \sum_{i=0}^k f_i(\gamma) \cdot z_i^\gamma
 \end{equation}
 
-Since every $f_i(\gamma)$ is just a constant, rewriting $f_i$ with binomial-coefficient basis gives
+Since every $f_i(\gamma)$ is just a constant, rewriting $f_i$ with binomial basis gives
 
 \begin{equation}
   f_i(\gamma) = \overbrace{\binom{\gamma}{0}}^1 \overbrace{\binom{k}{i} (-1)^i}^{c_{i, 0}}
@@ -331,7 +327,7 @@ i.e. $c_{i, 0} = \binom{k}{i} (-1)^i$, while all $c_{i, j} = 0$ when $j > 0$.
 Substituting into (\ref{eq:generalization}) with $M = k + 1$ (indexing from zero instead), we recover (\ref{eq:fors-closed}), the formula for generic security of \spx with FORS.
 
 \begin{align}
-  \mathcal W(P_F)
+  \mathbb E[P_F(X)]
     &= \sum_{i = 0}^k \sum_{j=0}^{d_i} c_{i, j} (p z_i)^j \binom{q_s}{j} \left(1 - p + p z_i \right)^{q_s - j} \\
     &= \sum_{i = 0}^k c_{i, 0} \left(1 - p + p z_i \right)^{q_s} \\
     &= \sum_{i = 0}^k \binom{k}{i} (-1)^i \left(1 - (p - p z_i) \right)^{q_s} \\
@@ -342,23 +338,23 @@ Substituting into (\ref{eq:generalization}) with $M = k + 1$ (indexing from zero
 
 \subsubsection{PORS+FP}
 
-Applied to PORS+FP \cite{forced_pruning}, with fixed parameters $k$ and $t$, we have
+Applied to PORS+FP \cite{forced_pruning} with fixed parameters $k$ and $t$, we have
 
 \begin{equation}
 \label{eq:pors-pf}
   P_F(\gamma) = \binom{k \gamma}{k} / \binom{t}{k}
 \end{equation}
 
-This is already written as a polynomial in $\gamma$ of degree $k$, with $M = 1$, and all bases $z_i = 1$. Thus we drop the summation over $i$.
+This is already written as a polynomial in $\gamma$ of degree $k$, with $M = 1$, and all bases $z_i = 1$. Thus we drop the summation over $i$ when applying (\ref{eq:generalization}).
 
 \begin{align}
-  \mathcal W(P_F)
+  \mathbb E[P_F(X)]
     &= \sum_{i = 1}^M \sum_{j=0}^{d_i} c_{i, j} (p z_i)^j \binom{q_s}{j} \left(1 - p + p z_i \right)^{q_s - j} \\
     &= \sum_{j=0}^k c_j\ p^j \binom{q_s}{j} \left(1 - p + p \right)^{q_s - j} \\
     &= \sum_{j=0}^k c_j\ p^j \binom{q_s}{j} \label{eq:pors-forge-succinct}
 \end{align}
 
-It remains to find the binomial-coefficient basis coefficients $\{c_0, c_1, \ldots, c_k\}$ such that $P_F(\gamma) = \sum_{j=0}^k c_j \binom{\gamma}{j} = \binom{k \gamma}{k} / \binom{t}{k}$. We will construct an apparatus to compute these coefficients using only the given form of $P_F$.
+It remains to find the binomial basis coefficients $\{c_0, c_1, \ldots, c_k\}$ such that $P_F(\gamma) = \sum_{j=0}^k c_j \binom{\gamma}{j} = \binom{k \gamma}{k} / \binom{t}{k}$. We will construct an apparatus to compute these coefficients using only the given form of $P_F$.
 
 Let $\Delta$ denote the \emph{forward difference} operator.
 
@@ -382,14 +378,19 @@ Apply $\Delta$ to the exponential polynomial form of $P_F$.
   \Delta P_F(\gamma) &= \sum_{j=0}^k c_j \left( \binom{\gamma + 1}{j} - \binom{\gamma}{j} \right)
 \end{align}
 
-Invoke Pascal's rule $\binom{n}{m} = \binom{n - 1}{m} + \binom{n - 1}{m - 1}$ and apply $\Delta$ repeatedly.
+Invoke Pascal's rule $\binom{n}{m} = \binom{n - 1}{m} + \binom{n - 1}{m - 1}$.
 
-\begin{align}
-  \Delta P_F(\gamma) &= \sum_{j=1}^k c_j \binom{\gamma}{j - 1} \\
-  \Delta^\ell P_F(\gamma) &= \sum_{j=\ell}^k c_j \binom{\gamma}{j - \ell}
-\end{align}
+\begin{equation}
+  \Delta P_F(\gamma) = \sum_{j=1}^k c_j \binom{\gamma}{j - 1}
+\end{equation}
 
-Note the first $\ell$ terms are dropped because each contains a factor $\binom{\gamma}{j - \ell} = 0$ if $j < \ell$. If we evaluate $\Delta^\ell P_F(0)$, the trailing terms contain a factor $\binom{0}{j - \ell} = 0$ if $j > \ell$. This leaves only the $j = \ell$ term non-zero, for which we have
+Apply the $\ell$-th forward difference. Note the first $\ell$ terms are dropped because each contains a factor $\binom{\gamma}{j - \ell} = 0$ if $j < \ell$.
+
+\begin{equation}
+  \Delta^\ell P_F(\gamma) = \sum_{j=\ell}^k c_j \binom{\gamma}{j - \ell}
+\end{equation}
+
+If we evaluate $\Delta^\ell P_F(0)$, the trailing terms contain a factor $\binom{0}{j - \ell} = 0$ if $j > \ell$. This leaves only the $j = \ell$ term non-zero, for which we have
 
 \begin{align}
   \Delta^\ell P_F(0)
@@ -398,7 +399,7 @@ Note the first $\ell$ terms are dropped because each contains a factor $\binom{\
     &= c_\ell
 \end{align}
 
-Concretely: \textbf{Evaluating $\Delta^\ell P_F(0)$ gives the coefficient $c_\ell$.} In practice one could compute $\Delta^\ell P_F(0)$ using only the forward difference definition from (\ref{eq:forward-diff}) by building a table of evaluations of $P_F$, but we seek a closed form to compute the coefficients analytically.
+Concretely: \textbf{Evaluating $\Delta^\ell P_F(0)$ gives the binomial basis coefficient $c_\ell$.} In practice one could compute $\Delta^\ell P_F(0)$ using only the forward difference definition from (\ref{eq:forward-diff}) by building a table of evaluations of $P_F$, but we seek a closed form to compute the coefficients analytically.
 
 Let $(S f)(\gamma) := f(\gamma + 1)$ be the shift operator, and let $(I f)(\gamma) = f(\gamma)$ be the identity operator. We can write $\Delta = S - I$, and $\Delta^\ell = (S - I)^\ell$.
 
@@ -430,14 +431,21 @@ Substituting (\ref{eq:pors-pf}),
 Finally substituting back into (\ref{eq:pors-forge-succinct}), we obtain an exact formula to compute Abri and Katz's upper bound for the generic security of PORS+FP in only $(k+1)(k+2)/2 = O(k^2)$ terms, rather than the $q_s$ terms in the bound formula (Equation 2) of \cite{forced_pruning}, which was derived from that of \cite{sphincsplus}.
 
 \begin{equation}
+\label{eq:pors-closed}
 \boxed{
-  \mathcal W(P_F) = \binom{t}{k}^{-1} \sum_{\ell=0}^k p^\ell \binom{q_s}{\ell} \sum_{j = 0}^\ell (-1)^{\ell - j} \binom{\ell}{j} \binom{k j}{k}
+  \mathbb E[P_F(X)] = \binom{t}{k}^{-1} \sum_{\ell=0}^k p^\ell \binom{q_s}{\ell} \sum_{j = 0}^\ell (-1)^{\ell - j} \binom{\ell}{j} \binom{k j}{k}
 }
 \end{equation}
 
 \begin{equation}
-  \sigma_F \le \mathcal W(P_F)
+  \sigma_F \le \mathbb E[P_F(X)]
 \end{equation}
+
+\section{Conclusion}
+
+We find that the binomial probability distributions inherent to the \spx signing procedure admit a common structure for FTS security analysis, which this work formalizes into concrete, computable formulas (\ref{eq:fors-closed}, \ref{eq:generalization}, \ref{eq:pors-closed}).
+
+We note that our general formula (\ref{eq:generalization}) applies to a wide range of probability curve functions, but we do not claim maximum generality: We leave open the possibility that there may exist formulae which compute the same quantity faster, or for a wider class of FTS schemes.
 
 \newpage
 \bibliography{references}

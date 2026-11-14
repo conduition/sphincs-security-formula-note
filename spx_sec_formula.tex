@@ -136,7 +136,7 @@ We note the sum experiences catastrophic cancellation, and so requires numeric p
 
 \subsection{Implementation}
 
-We provide a supplemental implementation of the exact formula from (\ref{eq:fors-closed}) in Python, and empirically compare our .formula against the approximations from \cite{sphincsplus, smaller_sphincs} on various \spx parameter sets. It is available at
+We provide a supplemental implementation of the exact formula from (\ref{eq:fors-closed}) in Python, and empirically compare our formula against the approximations from \cite{sphincsplus, smaller_sphincs} on various \spx parameter sets. It is available at
 
 \url{https://github.com/
   &conduition/sphincs-itsr-formula-note}
@@ -182,7 +182,7 @@ For convenience, let $p = \frac{1}{2^h}$ and let $\mathcal W(g) := \mathbb E \le
   \mathcal W(a + b) = \mathcal W(a) + \mathcal W(b)
 \end{equation}
 
-To compute $\mathcal W(g)$, we break $g$ down into $M$ additive pieces $\{g_1, g_2, \ldots g_M\}$ such that
+To compute $\mathcal W(g)$, we break $g$ down into $M$ additive pieces $\{g_1, g_2, \ldots, g_M\}$ such that
 
 \begin{equation}
   g(\gamma) = \sum_{i=1}^M g_i(\gamma)
@@ -203,11 +203,11 @@ We will show that there exists a broad class of functions for which this form of
   g(\gamma) := \sum_{i=1}^M f_i(\gamma) \cdot z_i^\gamma
 \end{equation}
 
-where $\{f_1, f_2, \ldots f_M\}$ is a set of real polynomials, and $\{z_1, z_2, \ldots z_M\}$ is a set of exponent bases.
+where $\{f_1, f_2, \ldots, f_M\}$ is a set of real polynomials, and $\{z_1, z_2, \ldots, z_M\}$ is a set of exponent bases.
 
 Let $d_i := \deg f_i$.
 
-Write each polynomial $f_i(\gamma)$ using a binomial-coefficient basis,\footnote{Any $d$-degree polynomial $f(x) = \sum_{i=0}^d a_i x^i$ can be rewritten in binomial-coefficient basis, as $$f(x) = \sum_{i=0}^d \binom{x}{i} i! \sum_{j=i}^d a_j \cdot S(j, i)$$ where $S(j, i)$ denotes Stirling numbers of the second kind.} with coefficients $\{c_{i, 0} \ldots c_{i, d_i}\}$.
+Write each polynomial $f_i(\gamma)$ using a binomial-coefficient basis,\footnote{Any $d$-degree polynomial $f(x) = \sum_{i=0}^d a_i x^i$ can be rewritten in binomial-coefficient basis, as $$f(x) = \sum_{i=0}^d \binom{x}{i} i! \sum_{j=i}^d a_j \cdot S(j, i)$$ where $S(j, i)$ denotes Stirling numbers of the second kind.} with coefficients $\{c_{i, 0}, c_{i, 1}, \ldots, c_{i, d_i}\}$.
 
 \begin{equation}
   f_i(\gamma) = \sum_{j=0}^{d_i} c_{i,j} \binom{\gamma}{j}

@@ -127,11 +127,14 @@ This offers an efficient formula for the exact \spx ITSR bit-security level agai
 
 We note the sum experiences catastrophic cancellation, and so requires numeric precision of at least $\log_2 \left( \frac{\binom{k}{\lfloor k/2 \rfloor}}{\sigma} \right)$ bits.
 
-\section{Implementation}
+\subsection{Implementation}
 
-We provide a supplemental implementation of the exact formula from (\ref{eq:closed}) in Python, and empirically compare our formula against the approximations from \cite{sphincsplus, smaller_sphincs} on various \spx parameter sets. It is available at
+We provide a supplemental implementation of the exact formula from (\ref{eq:fors-closed}) in Python, and empirically compare our .formula against the approximations from \cite{sphincsplus, smaller_sphincs} on various \spx parameter sets. It is available at
 
-\url{https://github.com/conduition/sphincs-itsr-formula-note}
+\url{https://github.com/
+  &conduition/sphincs-itsr-formula-note}
+
+
 
 \newpage
 \bibliography{references}

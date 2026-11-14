@@ -36,7 +36,7 @@ Let $h$ be the height of the \spx hypertree. Let $q_s$ be the number of signing 
 
 \emph{Interleaved target subset resilience} (ITSR) is the security notion governing \spx forgery security with-respect to FORS key overuse. In \cite{sphincsplus} section 5, the authors derive a closed-form formula for ITSR security assuming the message hashing function is a random keyed function. We briefly review their formula.
 
-Bernstein et al write $\mathrm{DarkSide}_\gamma$ for the probability that after exactly $\gamma$ signatures issued by a FORS key, a forgery attempt hits an exposed leaf in a FORS tree. Expanded, we have
+Bernstein et al. write $\mathrm{DarkSide}_\gamma$ for the probability that after exactly $\gamma$ signatures issued by a FORS key, a forgery attempt hits an exposed leaf in a FORS tree. Expanded, we have
 
 \begin{equation}
   \mathrm{DarkSide}_\gamma := 1 - \left( 1 - \frac{1}{2^a} \right)^\gamma

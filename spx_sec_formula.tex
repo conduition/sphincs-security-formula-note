@@ -73,7 +73,13 @@ Expand $\mathrm{DarkSide}^k_\gamma$ with the binomial theorem identity $(x + y)^
     &= \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma}
 \end{align}
 
-Let $P_\text{select}(\gamma) := \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^h} \right)^\gamma$ be the binomial probability of exactly $\gamma$ successes after $q_s$ trials, with a per-trial success rate of $\frac{1}{2^h}$.
+Let
+
+\begin{equation}
+  P_\text{select}(\gamma) := \binom{q_s}{\gamma} \left( 1 - \frac{1}{2^h} \right)^{q_s - \gamma} \left( \frac{1}{2^h} \right)^\gamma
+\end{equation}
+
+be the binomial probability of exactly $\gamma$ successes after $q_s$ trials, with a per-trial success rate of $\frac{1}{2^h}$.
 
 Substitute into (\ref{eq:sigma-naive}).
 

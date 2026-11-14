@@ -56,7 +56,7 @@ $\lambda = -\log_2 \sigma$ is precisely the ``bit security" level of \spx agains
 
 Computing $\sigma$ precisely requires evaluating the sum in (\ref{eq:sigma-naive}) over $q_s$ terms, which for many parameter sets is exceedingly large, e.g. $q_s = 2^{64}$ for NIST's SLH-DSA parameter sets \cite{fips205}.
 
-Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the leading terms until the contributions of additional terms fall below some threshold. This is imprecise, and does not scale when $q_s \gg 2^h$.
+Most of the weight in this probability sum sits on the first few terms, so $\sigma$ is typically \emph{approximated} by summing only the heaviest (low degree) terms until the contributions of additional terms fall below some threshold. This is imprecise, and does not scale when $q_s \gg 2^h$.
 
 \cite{smaller_sphincs} (Section 5) gives an approximation of (\ref{eq:sigma-naive}) in terms of a Poisson distribution which can be more efficiently computed per term, but it is still an approximation which deviates from the true $\sigma$ when $q_s \ll 2^h$.
 

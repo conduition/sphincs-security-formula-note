@@ -75,7 +75,7 @@ Expand $\mathrm{DarkSide}^k_\gamma$ with the binomial theorem identity $(x + y)^
   \mathrm{DarkSide}^k_\gamma
     &= \left( 1 - \left( 1 - \frac{1}{2^a} \right)^\gamma \right)^k \\
     &= \sum_{i=0}^k \binom{k}{i} 1^{k-i} \left(- \left(1 - \frac{1}{2^a} \right)^\gamma \right)^i \\
-    &= \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{i \gamma}
+    &= \sum_{i=0}^k \binom{k}{i} (-1)^i \left( 1 - \frac{1}{2^a} \right)^{\gamma i} \label{eq:darkside-binomial}
 \end{align}
 
 Let
@@ -138,6 +138,49 @@ This gives a closed-form solution for $\sigma$ with only $k+1$ terms.
 We thus obtain an efficient formula for the exact \spx ITSR bit-security level against generic attacks: $\lambda = - \log_2 \sigma$.
 
 We note the sum experiences catastrophic cancellation, and so requires numeric precision of at least $\log_2 \left( \frac{\binom{k}{\lfloor k/2 \rfloor}}{\sigma} \right)$ bits.
+
+\subsection{Combinatorial Perspective}
+
+We derived (\ref{eq:fors-closed}) mechanically from (\ref{eq:sigma-naive}) via the binomial theorem, but it could well have been formulated from scratch using the \emph{inclusion-exclusion} principle.
+
+We use set notation for probabilities. Let $C_i$ be the event that a fixed target leaf in FORS tree $i$ is revealed by $q_s$ \spx signatures. We seek to compute the probability $\sigma$ that all $k$ FORS trees are \emph{covered} in this way.
+
+\begin{equation}
+  \sigma = \Pr \left[ \bigcap_{i=1}^{k} C_i \right]
+\end{equation}
+
+Let $\bar{C_i}$ denote the complement event of $C_i$, i.e. the event where tree $i$ is \emph{not} covered. $\Pr[\bar C] = 1 - \Pr[C]$. We may rewrite $\sigma$ using complements, because the probability that a set of events all occur is the probability that none of them fail to occur.
+
+\begin{equation}
+  \sigma = \Pr \left[ \bigcap_{i=1}^{k} C_i \right] = 1 - \Pr \left[ \bigcup_{i=1}^{k} \bar{C_i} \right]
+\end{equation}
+
+By the inclusion-exclusion principle,
+
+\begin{align}
+  1 - \Pr \left[ \bigcup_{i=1}^k \bar{C_i} \right]
+    &= 1 - \sum_{i=1}^k \left( (-1)^{i-1} \sum_{\substack{S \subseteq \{1 \ldots k\} \\ |S|=i}} \overbrace{\Pr \left[ \bigcap_{j \in S} \bar{C_j} \right]}^{\text{all trees in $S$ missed}} \right) \\
+    &= \sum_{i=0}^k \left( (-1)^{i} \sum_{\substack{S \subseteq \{1 \ldots k\} \\ |S|=i}} \overbrace{\Pr \left[ \bigcap_{j \in S} \bar{C_j} \right]}^{\text{all trees in $S$ missed}} \right)
+\end{align}
+
+Fix a subset of FORS trees $S \subseteq \{1 \ldots k\}$ with $|S| = i$ at FORS address $\mathsf{idx}$. Fix a set of target leaf indices $T = \{T_j\}_{j \in S}$ with $T_j < 2^a$: one target index for each tree in $S$.
+
+A signing query hits address $\mathsf{idx}$ with probability $\frac{1}{2^h}$. Independently, the query samples $T' = \{T'_j\}_{j \in S}$. At least one leaf target hit $T'_j = T_j$ occurs with probability $1 - \left( 1 - \frac{1}{2^a} \right)^i = \mathrm{DarkSide}_i$. Therefore the probability of missing all of the $i$ indices in $T$ at $\mathsf{idx}$ in the same query must be $1 - \frac{\mathrm{DarkSide}_i}{2^h}$. The $q_s$ signing queries are independent, so the probability that all of the FORS targets $T$ are missed on all $q_s$ signing queries is
+
+\begin{equation}
+  \Pr \left[ \bigcap_{j \in S} \bar{C_j} \right] = \left( 1 - \frac{\mathrm{DarkSide}_i}{2^h} \right)^{q_s}
+\end{equation}
+
+This probability depends only on $i = |S|$, and there are $\binom{k}{i}$ such subsets. Therefore,
+
+\begin{align}
+  1 - \Pr \left[ \bigcup_{i=1}^k \bar{C_i} \right]
+    &= \sum_{i=0}^k (-1)^{i} \binom{k}{i} \left( 1 - \frac{\mathrm{DarkSide}_i}{2^h} \right)^{q_s} \\
+    &= \sigma
+\end{align}
+
+This is exactly (\ref{eq:fors-closed}). Our interpretation is that a forgery attempt on a fresh message samples its own $k$ target positions via $\mathbf{H}_\text{msg}$ independently of the signing queries, so the attempt succeeds exactly when all k trees are covered by $q_s$ prior signing queries.
+
 
 \subsection{Implementation}
 
